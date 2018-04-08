@@ -102,3 +102,6 @@ ENV/
 
 # database config file
 config.py
+
+# data source
+data/
