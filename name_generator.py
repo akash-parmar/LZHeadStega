@@ -1,5 +1,5 @@
 import mysql.connector
-from mysql.connector import errorcode
+from mysql.connector import errorcode, Error
 from faker import Faker
 from config import database_config
 
@@ -24,12 +24,36 @@ def close_db(cnx):
 	cnx.close()
 	print("Database Connection Closed...")
 
-def generate_fake_male(n=100):
-	fake = Faker()
-	result = [fake.name_male() for i in range(n)]
-	return result
+def extract_name_from_csv(filename):
+	result = []
+	with open(filename, 'r') as infile:
+		for line in infile:
+			result.append(line.replace("\n", "").lower())
 
+	return list(set(result))
+
+def save_name_to_database(cnx, data, firstname=True):
+	try:
+		if firstname:
+			query = "INSERT IGNORE INTO firstname(firstname) VALUES (%s)"
+		else:
+			query = "INSERT IGNORE INTO lastname(lastname) VALUES (%s)"
+
+		cursor = cnx.cursor()
+		data = [(x,) for x in data]
+		cursor.executemany(query, data)
+		cnx.commit()
+
+	except Error as e:
+		print("Exception : ", str(e))
+
+	finally:
+		cursor.close()
 
 if __name__ == "__main__" :
 	cnx = connect_db()
+	firstnames = extract_name_from_csv("data/Firstname.csv")
+	lastnames = extract_name_from_csv("data/Lastname.csv")
+	save_name_to_database(cnx, firstnames)
+	save_name_to_database(cnx, lastnames, firstname=False)
 	close_db(cnx)
