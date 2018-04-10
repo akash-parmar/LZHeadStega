@@ -30,10 +30,10 @@ if __name__ == "__main__":
 
 	lastname = list(set(lastname))
 
-	# append firstname to result file 
-	with open("data/result_firstname", 'a') as outfile:
+	# write firstname to result file 
+	with open("data/result_firstname", 'w') as outfile:
 		outfile.write("\n".join(x for x in firstname))
 
-	# append lastname to result file 
-	with open("data/result_lastname", 'a') as outfile:
+	# write lastname to result file 
+	with open("data/result_lastname", 'w') as outfile:
 		outfile.write("\n".join(x for x in lastname))
