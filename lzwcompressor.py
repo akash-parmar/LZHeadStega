@@ -7,21 +7,27 @@ class LZWCompressor(object):
 		try:
 			self.size = len(content)
 			self.dictionary = {x.split("->")[0] : int(x.split("->")[1]) for x in content}
-			
+
+			# manually add newline and tab character
+			self.dictionary['\n'] = self.size
+			self.size += 1
+			self.dictionary['\t'] = self.size
+			self.size += 1
+
 		except Exceptiion as e:
 			print("Exception Found: ", str(e))
 
-		print(self.dictionary)
 
 	def compress(self, filename):
-		with open(filename, 'rb') as infile:
+		with open(filename, 'r') as infile:
 			content = infile.read()
+		print("Uncompressed Length = ", len(content))
 
 		w = ""
 		result = []
 
-		for byte in content:
-			wc = w + chr(byte)
+		for c in content:
+			wc = w + c
 			if wc in self.dictionary:
 				w = wc
 			else:
@@ -29,7 +35,7 @@ class LZWCompressor(object):
 				# Add wc to the dictionary.
 				self.dictionary[wc] = self.size
 				self.size += 1
-				w = chr(byte)
+				w = c
 
 		# Output the code for w.
 		if w:
@@ -38,3 +44,6 @@ class LZWCompressor(object):
 
 if __name__ == "__main__":
 	lzw = LZWCompressor("string_table.txt")
+	compresed = lzw.compress("README.md")
+	print("Compressed Length = ", len(compresed))
+	print("Compressed Content = \n", compresed)
