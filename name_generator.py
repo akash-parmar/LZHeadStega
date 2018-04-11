@@ -52,8 +52,8 @@ def save_name_to_database(cnx, data, firstname=True):
 
 if __name__ == "__main__" :
 	cnx = connect_db()
-	firstnames = extract_name_from_csv("data/Firstname.csv")
-	lastnames = extract_name_from_csv("data/Lastname.csv")
+	firstnames = extract_name_from_csv("data/result_firstname")
+	lastnames = extract_name_from_csv("data/result_lastname")
 	save_name_to_database(cnx, firstnames)
 	save_name_to_database(cnx, lastnames, firstname=False)
 	close_db(cnx)
