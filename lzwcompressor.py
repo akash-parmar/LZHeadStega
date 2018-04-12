@@ -31,36 +31,40 @@ class LZWCompressor(object):
 		if self.binary: mode = 'rb'
 		else: mode = 'r'
 
-		with open(filename, mode) as infile:
-			content = infile.read()
-		print("Uncompressed Length = ", len(content))
+		try:
+			with open(filename, mode) as infile:
+				content = infile.read()
+			print("Uncompressed Length = ", len(content))
 
-		w = ""
-		result = []
+			w = ""
+			result = []
 
-		for c in content:
-			if self.binary:
-				wc = w + chr(c)
-			else:
-				wc = w + c
-
-			if wc in self.dictionary:
-				w = wc
-			else:
-				result.append(self.dictionary[w])
-				# Add wc to the dictionary.
-				self.dictionary[wc] = self.size
-				self.size += 1
-
+			for c in content:
 				if self.binary:
-					w = chr(c)
+					wc = w + chr(c)
 				else:
-					w = c
+					wc = w + c
 
-		# Output the code for w.
-		if w:
-			result.append(self.dictionary[w])
-			return result
+				if wc in self.dictionary:
+					w = wc
+				else:
+					result.append(self.dictionary[w])
+					# Add wc to the dictionary.
+					self.dictionary[wc] = self.size
+					self.size += 1
+
+					if self.binary:
+						w = chr(c)
+					else:
+						w = c
+
+			# Output the code for w.
+			if w:
+				result.append(self.dictionary[w])
+				return result
+
+		except Exception as e:
+			print("Exception Found: ", str(e))
 
 if __name__ == "__main__":
 	lzw = LZWCompressor("string_table.txt", binary=False)
