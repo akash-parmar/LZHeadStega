@@ -11,6 +11,10 @@ def check_alphabet_lower(s):
 
 class CoverGenerator(object):
 	def __init__(self, domain_mapping, string_table):
+		'''
+		@param string_table is an lzw dictionary object, not a path
+		'''
+
 		if domain_mapping is None or string_table is None:
 			print("Please Specify the domain mapping and string table !")
 			return
@@ -48,6 +52,8 @@ class CoverGenerator(object):
 				word.append(message[j])
 				word_string = "".join(self.get_key_by_value(x) for x in word)
 				j += 1
+				if j >= len(message):
+					break
 
 			# query the database, j is the index of non alphabet char
 			if len(word) == 0:
@@ -98,27 +104,34 @@ class CoverGenerator(object):
 					i += 1
 				else :
 					for _ in name:
-						if check_alphabet_lower(self.get_key_by_value(message[j])):
-							# stop appending message into word because len(word_string) == len(self.domain_map)
+						if j < len(message):
+							if check_alphabet_lower(self.get_key_by_value(message[j])):
+								# stop appending message into word because len(word_string) == len(self.domain_map)
+								email = _ + "@" + self.domain_map[len(word_string)]
+								if email not in generated_email:
+									generated_email.append(email)
+									i += len(word)
+									break
+							else:
+								# stop appending message into word because chr(message[i]) is not an alphabet
+								email = _ + str(message[j]) + "@" + self.domain_map[len(word_string)]
+								if email not in generated_email:
+									generated_email.append(email)
+									i += len(word) + 1
+									break
+						else:
 							email = _ + "@" + self.domain_map[len(word_string)]
 							if email not in generated_email:
 								generated_email.append(email)
 								i += len(word)
-								break
-						else:
-							# stop appending message into word because chr(message[i]) is not an alphabet
-							email = _ + str(message[j]) + "@" + self.domain_map[len(word_string)]
-							if email not in generated_email:
-								generated_email.append(email)
-								i += len(word) + 1
 								break
 		close_db(cnx)
 		return generated_email
 
 
 if __name__ == "__main__":
-	lzw = LZWCompressor("string_table.txt", binary=False)
-	compresed = lzw.compress("README.MD")
+	lzw = LZWCompressor("string_table.txt")
+	compresed = lzw.compress("input_txt/sample2.txt")
 	print("Compressed Length = ", len(compresed))
 	print("Compressed Content = \n", compresed)
 
@@ -128,3 +141,6 @@ if __name__ == "__main__":
 	result = generator.generate_cover(compresed)
 	print("\nTotal Email : \n", len(result))
 	print("\nemail generated : \n", result)
+
+	with open("email_generated/email_generated.txt", 'w') as outfile:
+		outfile.write("\n".join(x for x in result))

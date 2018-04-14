@@ -1,38 +1,32 @@
 class LZWCompressor(object):
 
-	def __init__(self, string_table=None, binary=True):
+	def __init__(self, string_table):
+		if string_table is None:
+			print("Please specify the string table for LZW !")
+			return
 
-		self.binary = binary
+		try:
+			with open(string_table, 'r') as infile:
+				content = infile.readlines()
+			content = [x.split("\n")[0] for x in content]
 
-		if binary:
-			self.size = 256
-			self.dictionary = {chr(x):x for x in range(self.size)}
-		else:
-			try:
-				with open(string_table, 'r') as infile:
-					content = infile.readlines()
-				content = [x.split("\n")[0] for x in content]
+			self.size = len(content)
+			self.dictionary = {x.split("->")[0] : int(x.split("->")[1]) for x in content}
 
-				self.size = len(content)
-				self.dictionary = {x.split("->")[0] : int(x.split("->")[1]) for x in content}
+			# manually add newline and tab character
+			self.dictionary['\n'] = self.size
+			self.size += 1
+			self.dictionary['\t'] = self.size
+			self.size += 1
 
-				# manually add newline and tab character
-				self.dictionary['\n'] = self.size
-				self.size += 1
-				self.dictionary['\t'] = self.size
-				self.size += 1
-
-			except Exception as e:
-				print("Exception Found: ", str(e))
+		except Exception as e:
+			print("Exception Found: ", str(e))
 
 
 	def compress(self, filename):
 
-		if self.binary: mode = 'rb'
-		else: mode = 'r'
-
 		try:
-			with open(filename, mode) as infile:
+			with open(filename, 'r') as infile:
 				content = infile.read()
 			print("Uncompressed Length = ", len(content))
 
@@ -40,10 +34,7 @@ class LZWCompressor(object):
 			result = []
 
 			for c in content:
-				if self.binary:
-					wc = w + chr(c)
-				else:
-					wc = w + c
+				wc = w + c
 
 				if wc in self.dictionary:
 					w = wc
@@ -52,11 +43,7 @@ class LZWCompressor(object):
 					# Add wc to the dictionary.
 					self.dictionary[wc] = self.size
 					self.size += 1
-
-					if self.binary:
-						w = chr(c)
-					else:
-						w = c
+					w = c
 
 			# Output the code for w.
 			if w:
@@ -66,8 +53,52 @@ class LZWCompressor(object):
 		except Exception as e:
 			print("Exception Found: ", str(e))
 
+
+	def decompress(self, string_table, compressed):
+		"""Decompress a list of output ks to a string."""
+		from io import StringIO
+
+		# Build the dictionary.
+		try:
+			with open(string_table, 'r') as infile:
+				content = infile.readlines()
+			content = [x.split("\n")[0] for x in content]
+
+			self.size = len(content)
+			self.dictionary = {int(x.split("->")[1]) : x.split("->")[0] for x in content}
+
+			# manually add newline and tab character
+			self.dictionary[self.size] = "\n"
+			self.size += 1
+			self.dictionary[self.size] = "\t"
+			self.size += 1
+
+			print("\nDictionary : \n", self.dictionary)
+
+		except Exception as e:
+			print("Exception Found: ", str(e))
+
+		result = StringIO()
+		w = self.dictionary[compressed.pop(0)]
+		result.write(w)
+		for k in compressed:
+			if k in self.dictionary:
+				entry = self.dictionary[k]
+			elif k == self.size:
+				entry = w + w[0]
+			else:
+				raise ValueError('Bad compressed k: %s' % k)
+			result.write(entry)
+
+			# Add w+entry[0] to the dictionary.
+			self.dictionary[self.size] = w + entry[0]
+			self.size += 1
+
+			w = entry
+		return result.getvalue()
+
 if __name__ == "__main__":
-	lzw = LZWCompressor("string_table.txt", binary=False)
-	compresed = lzw.compress("README.MD")
-	print("Compressed Length = ", len(compresed))
-	print("Compressed Content = \n", compresed)
+	lzw = LZWCompressor("string_table.txt")
+	compressed = lzw.compress("README.MD")
+	print("Compressed Length = ", len(compressed))
+	print("Compressed Content = \n", compressed)
