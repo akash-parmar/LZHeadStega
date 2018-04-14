@@ -131,7 +131,7 @@ class CoverGenerator(object):
 
 if __name__ == "__main__":
 	lzw = LZWCompressor("string_table.txt")
-	compresed = lzw.compress("input_txt/sample2.txt")
+	compresed = lzw.compress("input_txt/sample3.txt")
 	print("Compressed Length = ", len(compresed))
 	print("Compressed Content = \n", compresed)
 
