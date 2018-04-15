@@ -2,6 +2,8 @@ from tkinter import *
 from tkinter import ttk, filedialog, scrolledtext, messagebox
 from functools import partial
 from lzwcompressor import LZWCompressor
+from lzwdecompressor import LZWDecompressor
+from extractor import MessageExtractor
 from cover_generator import CoverGenerator
 from email_sender import EmailSender
 from os.path import isfile
@@ -22,6 +24,9 @@ class Window:
 
 		# component for message Hiding
 		self.initialize_message_hiding()
+
+		# component for message extracting
+		self.initialize_message_extracting()
 
 		# Bottom_Frame
 		quit_button = Button(self.bottom_frame, text='Quit', command=master.destroy)
@@ -105,7 +110,7 @@ class Window:
 
 		try:
 			if len(secret_path) == 0 or len(dictionary_path) == 0 or len(domain_mapping) == 0:
-				raise Exception("Please select the plaintext and public key !")
+				raise Exception("Please select the plaintext, dictionary and domain mapping !")
 			if not isfile(secret_path) or not isfile(dictionary_path) or not isfile(domain_mapping):
 				raise Exception("Cannot find the specified file !")
 
@@ -199,6 +204,101 @@ class Window:
 		result = sender.send(username, password, tolist, subject, body)
 		print(result)
 		messagebox.showinfo("Info ", result)
+
+
+	def initialize_message_extracting(self):
+		frame_extracting = Frame(self.tab_email_extractor)
+		frame_extracting.place(anchor='nw', relx=0.05, rely=0)
+
+		# Label
+		email_label = Label(frame_extracting, text="Email File: ")
+		email_label.grid(row=0, column=0, padx=5.0, pady=2.5)
+
+		dictionary_label = Label(frame_extracting, text="String Table: ")
+		dictionary_label.grid(row=1, column=0, padx=5.0, pady=2.5)
+
+		domain_label = Label(frame_extracting, text="Domain Mapping: ")
+		domain_label.grid(row=2, column=0, padx=5.0, pady=2.5)
+
+		result_label = Label(frame_extracting, text="Secret Message: ")
+		result_label.grid(row=4, column=0, padx=5.0, pady=2.5)
+
+		# Scrolled Text
+		self.hidden_message = scrolledtext.ScrolledText(frame_extracting, width=90, height=20)
+		self.hidden_message.grid(row=4, column=0, padx=5.0, pady=2.5, columnspan=20)
+
+		# Entry
+		self.email_entry = Entry(frame_extracting, width=50)
+		self.email_entry.grid(row=0, column=1, padx=5.0, pady=2.5)
+
+		self.ext_dictionary_entry = Entry(frame_extracting, width=50)
+		self.ext_dictionary_entry.grid(row=1, column=1, padx=5.0, pady=2.5)
+
+		self.ext_domain_entry = Entry(frame_extracting, width=50)
+		self.ext_domain_entry.grid(row=2, column=1, padx=5.0, pady=2.5)
+
+		# Button
+		browse_email_button = Button(frame_extracting, text="Browse", command=partial(self.browse_plaintext, self.email_entry))
+		browse_email_button.grid(row=0, column=2, padx=5.0, pady=2.5)
+
+		browse_dictionary_button = Button(frame_extracting, text="Browse", command=partial(self.browse_plaintext, self.ext_dictionary_entry))
+		browse_dictionary_button.grid(row=1, column=2, padx=5.0, pady=2.5)
+
+		browse_domain_button = Button(frame_extracting, text="Browse", command=partial(self.browse_plaintext, self.ext_domain_entry))
+		browse_domain_button.grid(row=2, column=2, padx=5.0, pady=2.5)
+
+		extract_button = Button(frame_extracting, text="Extract", command=self.extract_message)
+		extract_button.grid(row=3, column=0, padx=5.0, pady=10)
+
+		save_hidden_message_button = Button(frame_extracting, text="Save", command=partial(self.save_to_file, self.hidden_message))
+		save_hidden_message_button.grid(row=5, column=0, padx=5.0, pady=2.5)
+
+
+	def extract_message(self):
+		email_path = self.email_entry.get()
+		dict_path = self.ext_dictionary_entry.get()
+		domain_path = self.ext_domain_entry.get()
+
+		try:
+			if len(email_path) == 0 or len(dict_path) == 0 or len(domain_path) == 0:
+				raise Exception("Please select the email file, dictionary and domain mapping !")
+			if not isfile(email_path) or not isfile(dict_path) or not isfile(domain_path):
+				raise Exception("Cannot find the specified file !")
+
+			# Read the email file
+			with open(email_path, 'r') as infile:
+				content = infile.readlines()
+			emails = [x.split("\n")[0] for x in content]
+
+			# Extract compressed message
+			start = time.clock()
+			extractor = MessageExtractor(domain_path, dict_path)
+			compressed = extractor.extract(emails)
+
+			# Decompress the message
+			decompressor = LZWDecompressor(dict_path)
+			decompressed = decompressor.decompress(compressed)
+			end = time.clock()
+
+			self.hidden_message.delete(1.0, END)
+			self.hidden_message.insert(INSERT, decompressed)
+
+			summary = "Elapsed Time = " + str(end-start) + " seconds\n"
+			messagebox.showinfo("Summary", summary)
+
+		except Exception as e:
+			messagebox.showerror("Exception Found: ", str(e))
+
+
+	def save_to_file(self, source):
+		print(source.get(1.0, END)[:10])
+		f = filedialog.asksaveasfile(initialdir="/", title="Select File",
+										mode='w', defaultextension=".txt",
+										filetypes=(("Text File", "*.txt"), ("all files", "*.*")))
+		if f is None:
+			return
+		f.write(source.get(1.0, END))
+		f.close()
 
 
 if __name__ =="__main__":
