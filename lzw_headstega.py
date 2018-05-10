@@ -184,14 +184,14 @@ class Window:
 
 		# Button
 		send_button = Button(bottom_frame, text="Send", command=partial(self.send_email, host_variable, username_entry, pass_entry, 
-																		subject_entry, self.email_generated, body_entry))
+																		subject_entry, self.email_generated, body_entry, window))
 		send_button.pack(side=RIGHT)
 
 		cancel_button = Button(bottom_frame, text="Cancel", command=window.destroy)
 		cancel_button.pack(side=RIGHT)
 
 
-	def send_email(self, _host, _username, _password, _subject, _toaddr, _body):
+	def send_email(self, _host, _username, _password, _subject, _toaddr, _body, window):
 		host = _host.get()
 		username = _username.get()
 		password = _password.get()
@@ -204,6 +204,7 @@ class Window:
 		result = sender.send(username, password, tolist, subject, body)
 		print(result)
 		messagebox.showinfo("Info ", result)
+		window.destroy()
 
 
 	def initialize_message_extracting(self):
@@ -276,8 +277,7 @@ class Window:
 			compressed = extractor.extract(emails)
 
 			# Decompress the message
-			decompressor = LZWDecompressor(dict_path)
-			decompressed = decompressor.decompress(compressed)
+			decompressed = extractor.get_message(compressed)
 			end = time.clock()
 
 			self.hidden_message.delete(1.0, END)
