@@ -1,26 +1,9 @@
 class LZWDecompressor(object):
 
-	def __init__(self, string_table):
-		if string_table is None:
-			print("Please specify the string table for LZW !")
-			return
-
-		try:
-			with open(string_table, 'r') as infile:
-				content = infile.readlines()
-			content = [x.split("\n")[0] for x in content]
-
-			self.size = len(content)
-			self.dictionary = {int(x.split("->")[1]) : x.split("->")[0] for x in content}
-
-			# manually add newline and tab character
-			self.dictionary[self.size] = "\n"
-			self.size += 1
-			self.dictionary[self.size] = "\t"
-			self.size += 1
-
-		except Exception as e:
-			print("Exception Found: ", str(e))
+	def __init__(self):
+		self.binary = True
+		self.size = 256
+		self.dictionary = {x : chr(x) for x in range(self.size)}
 
 
 	def decompress(self, compressed):
@@ -50,10 +33,10 @@ class LZWDecompressor(object):
 if __name__ == "__main__":
 	from lzwcompressor import LZWCompressor
 
-	compressor = LZWCompressor("string_table.txt")
+	compressor = LZWCompressor()
 	compressed = compressor.compress("README.md")
 	print("\nCompressed Content :\n", compressed)
 
-	decompressor = LZWDecompressor("string_table.txt")
+	decompressor = LZWDecompressor()
 	decompressed = decompressor.decompress(compressed)
 	print("\nDecompressed Content :\n", decompressed)

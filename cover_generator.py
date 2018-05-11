@@ -130,8 +130,8 @@ class CoverGenerator(object):
 
 
 if __name__ == "__main__":
-	lzw = LZWCompressor("string_table.txt")
-	compresed = lzw.compress("input_txt/sample3.txt")
+	lzw = LZWCompressor()
+	compresed = lzw.compress("input_txt/sample1.txt")
 	print("Compressed Length = ", len(compresed))
 	print("Compressed Content = \n", compresed)
 
@@ -142,5 +142,5 @@ if __name__ == "__main__":
 	print("\nTotal Email : \n", len(result))
 	print("\nemail generated : \n", result)
 
-	with open("email_generated/email_generated.txt", 'w') as outfile:
+	with open("email_generated/testing.txt", 'w') as outfile:
 		outfile.write("\n".join(x for x in result))
