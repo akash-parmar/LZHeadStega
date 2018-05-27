@@ -105,7 +105,7 @@ class Window:
 
 	def generate_cover(self):
 		secret_path = self.hiding_plaintext_entry.get()
-		dictionary_path = self.hiding_dictionary_entry.get()
+		#dictionary_path = self.hiding_dictionary_entry.get()
 		domain_mapping = self.hiding_domain_entry.get()
 
 		try:
@@ -117,7 +117,7 @@ class Window:
 			start = time.clock()
 			compressor = LZWCompressor()
 			compressed = compressor.compress(secret_path)
-
+			print("len compressed: ", len(compressed))
 			generator = CoverGenerator(domain_mapping, compressor.dictionary)
 			result = generator.generate_cover(compressed)
 			end = time.clock()
@@ -257,7 +257,7 @@ class Window:
 
 	def extract_message(self):
 		email_path = self.email_entry.get()
-		dict_path = self.ext_dictionary_entry.get()
+		#dict_path = self.ext_dictionary_entry.get()
 		domain_path = self.ext_domain_entry.get()
 
 		try:
