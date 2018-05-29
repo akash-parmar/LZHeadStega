@@ -1,9 +1,16 @@
 class LZWDecompressor(object):
 
-	def __init__(self):
-		self.binary = True
-		self.size = 256
-		self.dictionary = {x : chr(x) for x in range(self.size)}
+	def __init__(self, filename):
+		try:
+			with open(filename, 'r') as infile:
+				content = infile.read()
+			content = content.split('\n')
+
+			self.size = len(content)
+			self.dictionary = {int(x.split('->')[1]) : chr(int(x.split('->')[0])) for x in content}
+
+		except Exception as e:
+			print("Exception Found: ", str(e))
 
 
 	def decompress(self, compressed):
@@ -33,10 +40,10 @@ class LZWDecompressor(object):
 if __name__ == "__main__":
 	from lzwcompressor import LZWCompressor
 
-	compressor = LZWCompressor()
+	compressor = LZWCompressor('string_table')
 	compressed = compressor.compress("README.md")
 	print("\nCompressed Content :\n", compressed)
 
-	decompressor = LZWDecompressor()
+	decompressor = LZWDecompressor('string_table')
 	decompressed = decompressor.decompress(compressed)
 	print("\nDecompressed Content :\n", decompressed)

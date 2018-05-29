@@ -1,10 +1,17 @@
 class LZWCompressor(object):
 
-	def __init__(self):
-		self.binary = True
-		self.size = 256
-		self.dictionary = {chr(x) : x for x in range(self.size)}
-		
+	def __init__(self, filename):
+		try:
+			with open(filename, 'r') as infile:
+				content = infile.read()
+			content = content.split('\n')
+
+			self.size = len(content)
+			self.dictionary = {chr(int(x.split('->')[0])) : int(x.split('->')[1]) for x in content}
+
+		except Exception as e:
+			print("Exception Found: ", str(e))
+
 
 	def compress(self, filename):
 		try:
@@ -37,7 +44,7 @@ class LZWCompressor(object):
 			
 
 if __name__ == "__main__":
-	lzw = LZWCompressor()
+	lzw = LZWCompressor('string_table')
 	compressed = lzw.compress("README.MD")
 	print("Compressed Length = ", len(compressed))
 	print("Compressed Content = \n", compressed)

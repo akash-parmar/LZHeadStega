@@ -48,8 +48,8 @@ class MessageExtractor(object):
 		return result
 
 
-	def get_message(self, compressed):
-		lzw = LZWDecompressor()
+	def get_message(self, compressed, string_table_path):
+		lzw = LZWDecompressor(string_table_path)
 		return lzw.decompress(compressed)
 
 
@@ -62,4 +62,4 @@ if __name__ == "__main__":
 	result = extractor.extract(emails)
 	print("\nMessage Extracted : \n", result)
 
-	print("\nOriginal Message :\n", extractor.get_message(result))
+	print("\nOriginal Message :\n", extractor.get_message(result, 'string_table'))
