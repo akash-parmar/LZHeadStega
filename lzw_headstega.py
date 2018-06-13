@@ -294,7 +294,9 @@ class Window:
 		f = filedialog.asksaveasfile(initialdir="/", title="Select File", mode='wb')
 		if f is None:
 			return
-		item = [ord(x) for x in source.get(1.0, END)]
+		saveitem = source.get(1.0, END)
+		saveitem = saveitem[:-1]
+		item = [ord(x) for x in saveitem]
 		f.write(bytes(item))
 		f.close()
 

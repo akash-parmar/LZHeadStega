@@ -1,6 +1,7 @@
 import re
 from lzwcompressor import LZWCompressor
 from lzwdecompressor import LZWDecompressor
+from headstega_extractor import dictionary as extractdictionary
 
 def get_number_from_string(s):
 	result = re.findall('\d+', s)
@@ -58,7 +59,7 @@ if __name__ == "__main__":
 		emails = infile.readlines()
 
 	emails = [x.split("\n")[0] for x in emails]
-	extractor = MessageExtractor("domain_mapping.txt")
+	extractor = MessageExtractor("domain_mapping")
 	result = extractor.extract(emails)
 	print("\nMessage Extracted : \n", result)
 

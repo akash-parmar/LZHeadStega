@@ -1,5 +1,7 @@
 from lzwcompressor import LZWCompressor
 from name_generator import connect_db, close_db
+from headstega import dictionary as coverdictionary
+import random
 
 def check_alphabet_lower(s):
 	if len(s) > 1:
@@ -8,6 +10,7 @@ def check_alphabet_lower(s):
 	if ord(s) < 97 or ord(s) > 122:
 		return False
 	return True
+
 
 class CoverGenerator(object):
 	def __init__(self, domain_mapping, string_table):
@@ -135,12 +138,11 @@ if __name__ == "__main__":
 	print("Compressed Length = ", len(compresed))
 	print("Compressed Content = \n", compresed)
 
-	generator = CoverGenerator("domain_mapping.txt", lzw.dictionary)
+	generator = CoverGenerator("domain_mapping", lzw.dictionary)
 	print("\nstring table : \n", generator.dictionary)
 	print("\ndomain mapping : \n", generator.domain_map)
 	result = generator.generate_cover(compresed)
 	print("\nTotal Email : \n", len(result))
-	print("\nemail generated : \n", result)
 
 	with open("email_generated/testing.txt", 'w') as outfile:
 		outfile.write("\n".join(x for x in result))
