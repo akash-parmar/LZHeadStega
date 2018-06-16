@@ -34,18 +34,38 @@ class MessageExtractor(object):
 
 	def extract(self, emails):
 		result = []
+		binstring = ['00000000']
 		for email in emails:
 			k = self.get_k_by_domain(email.split('@')[1])
 			if k == 0:
-				result.append(get_number_from_string(email)[0])
+				num = get_number_from_string(email)[0]
+				if num <= 15:
+					if len(binstring[-1]) <= 8:
+						binstring[-1] = binstring[-1] + bin(num)[2:].zfill(4)
+					else:
+						binstring.append(bin(num)[2:].zfill(4))
+				else:
+					binstring.append(bin(num)[2:])
 			else:
 				secret_char = email[:k]
 				for c in secret_char:
-					result.append(self.dictionary[c])
+					if len(binstring[-1]) < 8:
+						binstring[-1] = binstring[-1] + extractdictionary[c]
+					else:
+						binstring.append(extractdictionary[c])
 
 				num = get_number_from_string(email)
 				if len(num) > 0:
-					result.append(num[0])
+					num = num[0]
+					if num <= 255:
+						binstring.append(bin(num)[2:].zfill(8))
+					else:
+						binstring.append(bin(num)[2:])
+
+		# Remove the padding in the front and extract the message
+		binstring = binstring[1:]
+		result = [int(x,2) for x in binstring]
+		print("extracted: ", result)
 		return result
 
 
